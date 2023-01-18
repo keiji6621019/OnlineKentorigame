@@ -148,13 +148,21 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3382704969553238912}
     m_Modifications:
+    - target: {fileID: 2776094393786115805, guid: 4d92c8e3519d202428f66c800e8a665f, type: 3}
+      propertyPath: arrow
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 2776094395089394626, guid: 4d92c8e3519d202428f66c800e8a665f, type: 3}
+      propertyPath: m_SortingOrder
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 3357894858921445001, guid: 4d92c8e3519d202428f66c800e8a665f, type: 3}
       propertyPath: sceneViewId
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3417972519577759001, guid: 4d92c8e3519d202428f66c800e8a665f, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 20
+      value: 5
       objectReference: {fileID: 0}
     - target: {fileID: 3659139094669609078, guid: 4d92c8e3519d202428f66c800e8a665f, type: 3}
       propertyPath: m_SortingOrder
@@ -222,7 +230,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8782826864466416855, guid: 4d92c8e3519d202428f66c800e8a665f, type: 3}
       propertyPath: m_SortingOrder
-      value: 40
+      value: 29
       objectReference: {fileID: 0}
     - target: {fileID: 8964100247799024611, guid: 4d92c8e3519d202428f66c800e8a665f, type: 3}
       propertyPath: m_Name

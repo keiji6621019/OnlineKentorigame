@@ -5,28 +5,28 @@ using Photon.Realtime;
 using ExitGames.Client.Photon;
 using TMPro;
 using System.Collections.Generic;
+using System;
+using UnityEngine.UI;
 
 public enum Fraction
-    {
-        NPC,
-        ENEMY,
-        PLAYER
-    }
+{
+    NPC,
+    ENEMY,
+    PLAYER
+}
 
 public class Node : MonoBehaviourPunCallbacks, IPunObservable, IPunInstantiateMagicCallback
 {
     public static Node instance;
     int maxAmount;
     int startAmount = 10;
-    int currentAmount;
+    public int currentAmount;
     int numberOfUnits;
-
-    
-
-
 
     public Material[] materials;
     public Material[] fieldmaterials;
+
+    
     //追加
     //public Fieldcolor[] fieldcolors;
     //public List<Fieldcolor> fields = new List<Fieldcolor>();
@@ -44,79 +44,61 @@ public class Node : MonoBehaviourPunCallbacks, IPunObservable, IPunInstantiateMa
         SMALL_CITY
     }
 
-    public Fraction fraction; 
+    public Fraction fraction;
 
     public NodeType type;
 
     public GameObject unitPrefab;
+    public GameObject arrowPrefab;
+    public GameObject DamageTextPrefab;
+
     private Vector3 Pos;
     private Vector3 FieldPos;
     private Vector3 Playerpos;
     private Vector3 Enemypos;
 
-    
+    Plane plane = new Plane();
+    float distance = 0;
+    private Vector3 mouse;
+
+
 
     private void Awake()
     {
-        
-            instance = this;
-        
+
+        instance = this;
+
     }
 
     void Start()
     {
-        
+        plane.SetNormalAndPosition(Vector3.back, transform.localPosition);
+
         if (PhotonNetwork.IsMasterClient)
         {
-            //名前の生成　被りなし
-            //int start = 1;
-            //int end = 10;
 
-            //List<int> numbers = new List<int>();
-
-            //for (int i = start; i <= end; i++)
-            //    {
-            //        numbers.Add(i);
-            //    }
-
-            //    while (numbers.Count > 0)
-            //    {
-
-            //        name = Random.Range(0, numbers.Count).ToString();
-
-            //        numbers.RemoveAt(name);
-            //    }
-
-            this.name = Random.Range(0, 200).ToString();
+            this.name = UnityEngine.Random.Range(0, 20000).ToString();
 
         }
 
         if (photonView.IsRoomView)
         {
-            
-            
-                
-                GetComponent<SpriteRenderer>().material = materials[0];
+            Sprite fieldStrong = transform.parent.GetComponent<SpriteRenderer>().sprite;
+            GetComponent<SpriteRenderer>().material = materials[0];
+            if (fieldStrong.name == "大田区")
+            {
+                Debug.Log("ルーム変更");
+                transform.parent.GetComponent<Renderer>().material = fieldmaterials[3];
+            }
+            else
+            {
                 transform.parent.GetComponent<Renderer>().material = fieldmaterials[0];
-                this.fraction = Fraction.NPC;
-                this.type = NodeType.SMALL_CITY;
-                amountText.text = "10/10";
-                //transform.GetChild(1).GetComponent<Renderer>().material = fieldcolor["Glay"];
-                //Sprite fieldsprite = Resources.Load<Sprite>("Sprites/" + name);
-                //transform.GetChild(1).GetComponent<SpriteRenderer>().sprite = fieldsprite;
-                //追加　子オブジェクトのマテリアル変更
-                //transform.GetChild(1).GetComponent<Renderer>().material = fieldmaterials[0];
-                //Invoke("NPCField", 0.5f);
-                //Fieldsetting();
+            }
+            
+            this.fraction = Fraction.NPC;
+            this.type = NodeType.SMALL_CITY;
+            amountText.text = "10/10";
 
-            
-            //Dictionary<string, Material> fieldcolor = new Dictionary<string, Material>
-            //{
-            //{"Glay", fieldmaterials[0]},
-            //{"Red", fieldmaterials[1]},
-            //{"Blue", fieldmaterials[2]},
-            //};
-            
 
         }
 
@@ -151,100 +133,106 @@ public class Node : MonoBehaviourPunCallbacks, IPunObservable, IPunInstantiateMa
                 break;
         }
 
-        if (this.fraction == Fraction.PLAYER){
+        if (this.fraction == Fraction.PLAYER)
+        {
             StartCoroutine(Produce());
             UpdateAmountText();
         }
 
-        //追加
-        //foreach (Fieldcolor field in fieldcolors)
-        //{
-        //    fields.Add(field);
-        //}
-        //Instantiate(fieldObject, this.transform.position, Quaternion.identity);
-        //GameObject newField = Instantiate(fieldObject, this.transform.position, Quaternion.identity);
-        //Fieldcolor field = newField.GetComponent<Fieldcolor>();
-        //newField.GetComponent<Fieldcolor>().Setfield(GetComponent<SpriteRenderer>().material);
-
-        //Debug.Log(photonView.Owner.UserId);
     }
+
+    //private void Update()
+    //{
+    //    elapsedTime += Time.deltaTime;
+    //}
 
 
     void IPunObservable.OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        PhotonNetwork.SendRate = 50; // 1秒間にメッセージ送信を行う回数
-        PhotonNetwork.SerializationRate = 10; // 1秒間にオブジェクト同期を行う回数
+        PhotonNetwork.SendRate = 100; // 1秒間にメッセージ送信を行う回数
+        PhotonNetwork.SerializationRate = 50; // 1秒間にオブジェクト同期を行う回数
         //&& this.photonView.IsMine
         //Debug.Log("発生");
         if (stream.IsWriting)
         {
             stream.SendNext(this.name);
-            stream.SendNext(currentAmount);
-            
+            stream.SendNext(currentAmount);         
 
-            
-            
-           
-            
         }
         else
-        {
+        {   
 
             this.name = (string)stream.ReceiveNext();
             currentAmount = (int)stream.ReceiveNext();
+
             
             
-            UpdateAmountText();
-            
+          UpdateAmountText();
+
         }
+    }
+
+    public void ArrowStart()
+    {
+        Pos = this.transform.position;
+        
+        GameObject newArrow = Instantiate(arrowPrefab, Pos, Quaternion.identity);
+        newArrow.GetComponent<CursorDirection>().Setcursor(Pos);
+
+
     }
 
     void Produceunit()
     {
         //Debug.Log("数を増やします");
         currentAmount++;
-        if(currentAmount>maxAmount)
+        if (currentAmount > maxAmount)
         {
             currentAmount = maxAmount;
         }
 
-    UpdateAmountText(); 
+        UpdateAmountText();
 
-    } 
+    }
+
+
     IEnumerator Produce()
+    {
+        while (true)
         {
-            while(true)
-            {
-                yield return new WaitForSeconds(1);
-                Produceunit();
-            }
+            yield return new WaitForSeconds(1);
+            Produceunit();
         }
+    }
 
     void UpdateAmountText()
     {
-       // Debug.Log("玉の情報を更新します。");
-        amountText.text = currentAmount+"|"+ maxAmount;
+        // Debug.Log("玉の情報を更新します。");
+        amountText.text = currentAmount + "|" + maxAmount;
     }
-    
-    IEnumerator SendALLunits(string _tag)
+
+    IEnumerator SendALLunits(string _tag,int numberOfUnits)
     {
         Node goalNode = GameObject.Find(_tag).GetComponent<Node>();
-
-        int unitsToSend = currentAmount;
-        while(currentAmount > 0)
-        {
-            int unitsPerSend = currentAmount <= 5 ? currentAmount : 5;
-
-            AllUnit(goalNode,unitsPerSend);
-            currentAmount -= unitsPerSend;
-            //currentAmount -= unitsPerSend;
+        
+        while (numberOfUnits > 0)
+        {           
+            int unitsPerSend = numberOfUnits <= 5 ? numberOfUnits : 5;
+            //Debug.Log(unitsPerSend);
+            AllUnit(goalNode, unitsPerSend);
+            numberOfUnits -= unitsPerSend;
+            //Unitpersend(unitsPerSend);
             yield return new WaitForSeconds(0.5f);
             UpdateAmountText();
-            
+            if (photonView.IsMine)
+            {
+                currentAmount -= unitsPerSend;
 
+            }
         }
-         
-        
+
+
+
     }
 
     public void AllUnit(Node goalNode, int numberOfUnits)
@@ -259,125 +247,165 @@ public class Node : MonoBehaviourPunCallbacks, IPunObservable, IPunInstantiateMa
             float intervalDeg = 10f;
             float minDeg = -(numberOfUnits - 1) * intervalDeg / 2;
             float degree = (minDeg + intervalDeg * (float)i) / 180f * Mathf.PI;
-            newUnit.GetComponent<Unit>().SetUnit(fraction, goalNode, GetComponent<SpriteRenderer>().material,transform.parent.GetComponent<Fieldcolor>(),degree);
+            newUnit.GetComponent<Unit>().SetUnit(fraction, goalNode, GetComponent<SpriteRenderer>().material, transform.parent.GetComponent<Fieldcolor>(), degree);
 
         }
 
     }
     [PunRPC]
-    public void SendUnits(string tag)
+    public void SendUnits(string tag, int currentAmount)
     {
         if (photonView.IsMine)
         {
-            photonView.RPC(nameof(SendUnits), RpcTarget.Others, tag);    
+
+            photonView.RPC(nameof(SendUnits), RpcTarget.Others,tag,currentAmount);
+            
         }
-        StartCoroutine(SendALLunits(tag));
+        StartCoroutine(SendALLunits(tag, currentAmount));
+
+
 
     }
 
-    
 
-    public void HandleIncomingUnit(Fraction f,int senderID, Fieldcolor _fieldcolor)
+
+    public void HandleIncomingUnit(Fraction f, int senderID, Fieldcolor _fieldcolor)
     {
         //Debug.Log(f);
-       if(f == fraction)
-       {
-        //Debug.Log("Nodeの情報を変更します");
-        Produceunit();
+        if (f == fraction)
+        {
+            //Debug.Log("Nodeの情報を変更します");
+            Produceunit();
             return;
-       }
-       else
-       {
-        DestroyUnit(f,senderID,_fieldcolor);
-       }
+        }
+        else
+        {
+            DestroyUnit(f, senderID, _fieldcolor);
+        }
     }
 
     void DestroyUnit(Fraction f, int senderID, Fieldcolor _fieldcolor)
     {
         UpdateAmountText();
         Sprite fieldStrong = transform.parent.GetComponent<SpriteRenderer>().sprite;
+        var fieldcolorPos = this.transform.position;
 
-        switch(_fieldcolor.name)
+        //攻撃
+        //switch (_fieldcolor.name)
+        //{
+        //    case "渋谷新宿":
+        //        currentAmount -= 2;
+        //        break;
+
+        //    case "練馬区":
+        //        currentAmount -= 2;
+        //        break;
+
+        //    default:
+        //        Debug.Log("何もない");
+        //        break;
+        //}
+
+
+
+
+        //防御力
+        switch (fieldStrong.name)
         {
-            case "渋谷新宿":
-                currentAmount -= 5;
-                break;
-    
-            case "練馬区":
-                currentAmount -= 5;
-                break;
+            //case "渋谷新宿":
+            //    currentAmount = currentAmount - 1 / 2;
+            //    break;
 
-            default:
-                Debug.Log("何もない");
-                break;
-        }
-        
-        
-
-
-
-        switch(fieldStrong.name)
-        {
-            case "渋谷新宿":
-                currentAmount = currentAmount - 1 / 2;
-                break;
-            
-            case "練馬区":
-                currentAmount = currentAmount - 1 / 2;
-                break;
+            //case "練馬区":
+            //    currentAmount = currentAmount - 1 / 2;
+            //    break;
 
             case "江戸川区":
-                currentAmount = currentAmount - 10 / 3;
-                    break;
-            
-            case "千代田中央":
-                currentAmount = currentAmount - 10 / 3;
-                    break;
-
                 
+                var Range = UnityEngine.Random.Range(1, 3);
+                currentAmount = currentAmount - Range;
+
+                TextShowUp(Range, fieldcolorPos);
+                
+                
+                break;
+
+            case "千代田中央":
+                var Range1 = UnityEngine.Random.Range(1, 3);
+                currentAmount = currentAmount - Range1;
+                TextShowUp(Range1, fieldcolorPos);
+                break;
+
+
 
             default:
+                if (photonView.IsMine) { 
                 currentAmount--;
+        }
                 break;
 
 
 
 
         }
-        
-        if(currentAmount<=0)
+
+
+        if (currentAmount <= 0 && photonView.IsMine)
         {
             currentAmount = 0;
-            FractionHander(f,senderID);
+            //photonView.RPC("FractionHander", RpcTarget.All, f, senderID);
+            FractionHander(f, senderID);
+            UpdateAmountText();
+
+
         }
     }
+
+    public void TextShowUp(int range, Vector3 fieldcolorPos)
+    {
+        if (range > 1)
+        {
+            GameObject canvas = GameObject.Find("TopCanvas");
+            GameObject prefab1 = Instantiate(DamageTextPrefab, canvas.transform);
+            prefab1.GetComponent<Text>().text = "-" + range;
+            //prefab1.transform.SetParent(canvas.transform);
+            prefab1.transform.position = fieldcolorPos;
+
+        }
+
+    }
+
+
+
+    [PunRPC]
     void FractionHander(Fraction f, int senderID)
     {
         fraction = f;
-        switch(fraction)
+        switch (fraction)
         {
-           case Fraction.PLAYER: //相手のオブジェクトが自分のになるとき
-                GetComponent<SpriteRenderer>().material = materials[1];
-                //追加
-                //transform.GetChild(1).GetComponent<Renderer>().material = fieldmaterials[1];
-                PlayerField();
+            case Fraction.PLAYER: //相手のオブジェクトが自分のになるとき
+                if (photonView.IsMine)
+                {
 
+                    photonView.RPC("FractionHander", RpcTarget.Others, Fraction.ENEMY,senderID);
+                }
+                //Debug.Log("自分に代わるよ");
+                PlayerField();
                 StartCoroutine(Produce());
                 photonView.RequestOwnership();
-
-
                 break;
-           
-           case Fraction.ENEMY:
-                GetComponent<SpriteRenderer>().material = materials[2];
-                //追加
-                //transform.GetChild(1).GetComponent<Renderer>().material = fieldmaterials[2];
-                EnemyField();
 
+            case Fraction.ENEMY:
+                if (photonView.IsMine)
+                {
+
+                    photonView.RPC("FractionHander", RpcTarget.Others, Fraction.PLAYER,senderID);
+                }
+                EnemyField();
                 StopCoroutine(Produce());
                 photonView.TransferOwnership(senderID);
 
-           break;
+                break;
         }
     }
 
@@ -393,57 +421,37 @@ public class Node : MonoBehaviourPunCallbacks, IPunObservable, IPunInstantiateMa
             if (info.Sender.IsLocal)
             {
                 Debug.Log("自身がネットワークオブジェクトを生成しました");
-                //GetComponent<SpriteRenderer>().material = materials[1];
-
-                //追加
-                //Fieldsetting();
-
-                //追加
-                //transform.parent.GetComponent<Renderer>().material = fieldmaterials[1];
-                //PlayerField();
                 this.fraction = Fraction.PLAYER;
-
-                //追加　位置変更
-                //var playerposition = new Vector3(0, -6, 0);
-                //Playerpos = playerposition;
-                //this.Pos = new Vector3(0, 5, 0);
             }
             else
             {
                 Debug.Log("他プレイヤーがネットワークオブジェクトを生成しました");
-                //GetComponent<SpriteRenderer>().material = materials[2];
-                //追加
-                //Fieldsetting();
 
-                //追加
-                //transform.parent.GetComponent<Renderer>().material = fieldmaterials[2];
-                //EnemyField();
                 this.fraction = Fraction.ENEMY;
-
-                //追加　位置変更
-                //var enemyposition = new Vector3(0,6,0);
-                //Enemypos = enemyposition;
-                //this.Pos = new Vector3(0, -5, 0);
-
 
             }
         }
 
 
-        }
-        public void NPCField()
+    }
+    public void NPCField()
     {
         transform.parent.GetComponent<Renderer>().material = fieldmaterials[0];
-       
+
+
     }
+    [PunRPC]
     public void PlayerField()
     {
         transform.parent.GetComponent<Renderer>().material = fieldmaterials[1];
-      
+        GetComponent<SpriteRenderer>().material = materials[1];
+
     }
+    [PunRPC]
     public void EnemyField()
     {
         transform.parent.GetComponent<Renderer>().material = fieldmaterials[2];
+        GetComponent<SpriteRenderer>().material = materials[2];
     }
 
     [PunRPC]
@@ -451,78 +459,19 @@ public class Node : MonoBehaviourPunCallbacks, IPunObservable, IPunInstantiateMa
     {
         if (photonView.IsMine)
         {
-            Debug.Log("isMine");
+            //Debug.Log("isMine");
             photonView.RPC("setSprite", RpcTarget.OthersBuffered, name);
         }
         else
         {
 
-            Debug.Log(name);
+            //Debug.Log(name);
             this.transform.parent.name = name;
             Sprite fieldsprite = Resources.Load<Sprite>("WardSprites/" + name);
             this.transform.parent.GetComponent<SpriteRenderer>().sprite = fieldsprite;
         }
-        
+
 
     }
 
-    //void FieldHander()
-    //{
-    //    var sprite = GetComponentInParent<SpriteRenderer>().sprite;
-    //    switch (sprite)
-    //    {
-    //        case sprite: //相手のオブジェクトが自分のになるとき
-    //            GetComponent<SpriteRenderer>().material = materials[1];
-    //            //追加
-    //            //transform.GetChild(1).GetComponent<Renderer>().material = fieldmaterials[1];
-    //            PlayerField();
-
-    //            StartCoroutine(Produce());
-    //            photonView.RequestOwnership();
-
-
-    //            break;
-
-    //        case Fraction.ENEMY:
-    //            GetComponent<SpriteRenderer>().material = materials[2];
-    //            //追加
-    //            //transform.GetChild(1).GetComponent<Renderer>().material = fieldmaterials[2];
-    //            EnemyField();
-
-    //            StopCoroutine(Produce());
-    //            photonView.TransferOwnership(senderID);
-
-    //            break;
-    //    }
-    //}
-
-    //public void swichfield()
-    //{
-    //    foreach (Fieldcolor field in fieldcolors)
-    //    {
-    //        field.gameObject.SetActive(false);
-    //    }
-
-    //}
-
-    //追加
-    //public void Fieldsetting()
-    //{
-    //    GameObject newField = Instantiate(fieldObject, this.transform.position, Quaternion.identity);
-    //    newField.GetComponent<Fieldcolor>().Setfield(GetComponent<SpriteRenderer>().material);
-    //    Debug.Log(GetComponent<SpriteRenderer>().material);
-    //}
-    //public void Playerposition()
-    //{
-    //    if (photonView.IsMine && !photonView.IsRoomView)
-    //    {
-    //        this.Pos = new Vector3(0, 5, 0);
-
-    //    }
-    //    else if (!photonView.IsMine && !photonView.IsRoomView)
-    //    {
-    //        this.Pos = new Vector3(0, -5, 0);
-    //    }
-
-    //}
 }

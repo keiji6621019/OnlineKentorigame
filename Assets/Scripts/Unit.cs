@@ -1,8 +1,6 @@
 
 using UnityEngine;
 using System;
-using Photon.Pun;
-using Photon.Realtime;
 
 
 public class Unit : MonoBehaviour
@@ -134,7 +132,6 @@ public class Unit : MonoBehaviour
        Node n = col.GetComponent<Node>();
        if(n == goal)
        {
-        Debug.Log("“G‚É‚ ‚½‚Á‚½");
         n.HandleIncomingUnit(fraction,senderID, fieldcolor);
         Destroy(this.gameObject);
        } 

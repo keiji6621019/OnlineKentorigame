@@ -73,7 +73,7 @@ public class Samplescene : MonoBehaviourPunCallbacks
     private Text _textCountdown;
     public GameObject textGameObject;
 
-    
+
 
 
 
@@ -111,6 +111,9 @@ public class Samplescene : MonoBehaviourPunCallbacks
         
         _textCountdown.gameObject.SetActive(true);
         textGameObject.SetActive(true);
+
+        _textCountdown.text = "‘å“c‹æ‚ğx”z‚¹‚æI";
+        yield return new WaitForSeconds(2.0f);
 
         _textCountdown.text = "3";
         yield return new WaitForSeconds(1.0f);
@@ -168,6 +171,7 @@ public class Samplescene : MonoBehaviourPunCallbacks
         {"Glay", fieldmaterials[0]},
         {"Red", fieldmaterials[1]},
         {"Blue", fieldmaterials[2]},
+        {"Taget", fieldmaterials[3]},
 
 
     };
@@ -204,7 +208,7 @@ public class Samplescene : MonoBehaviourPunCallbacks
         var dic = this.Wardfpos;
         //dic.Remove("“È–Ø");
         dic.Remove("—û”n‹æ");
-        dic.Remove("a’JVh");
+        dic.Remove("Š‹ü‹æ");
 
 
         //Vector3[] positions =
@@ -250,7 +254,17 @@ public class Samplescene : MonoBehaviourPunCallbacks
                 //var Npcnode = PhotonNetwork.InstantiateRoomObject("Node", fieldPos, Quaternion.identity);
                 //Vector3 localPos = nodePos[name];
                 var NpcField = PhotonNetwork.InstantiateRoomObject("]ŒËì‹æ", fieldPos, Quaternion.identity);
-                NpcField.GetComponent<Renderer>().material = fieldcolor["Glay"];
+                
+                if (name == "‘å“c‹æ")
+                {
+                   NpcField.GetComponent<Renderer>().material = fieldcolor["Taget"];
+                    Debug.Log("RED");
+                }
+                else
+                {
+                    NpcField.GetComponent<Renderer>().material = fieldcolor["Glay"];
+                    Debug.Log("Glay");
+                }
                 Sprite fieldsprite = Resources.Load<Sprite>("WardSprites/" + name);
                 NpcField.GetComponent<SpriteRenderer>().sprite = fieldsprite;
                 NpcField.name = name;
@@ -269,15 +283,15 @@ public class Samplescene : MonoBehaviourPunCallbacks
         }
         else
         {
-            Prefpos.Add("a’JVh", new Vector3(-0.60999012f, -0.0622699261f, -1.30000019f));
+            Prefpos.Add("Š‹ü‹æ", new Vector3(1.39805746f, 1.050547f, -1.30000019f));
             //Debug.Log("“È–Ø");
-            var myPos = Prefpos["a’JVh"];
+            var myPos = Prefpos["Š‹ü‹æ"];
             var field = PhotonNetwork.Instantiate("]ŒËì‹æ", myPos, Quaternion.identity);
             field.GetComponent<Renderer>().material = fieldcolor["Red"];
-            Sprite sprite = Resources.Load<Sprite>("WardSprites/a’JVh");
+            Sprite sprite = Resources.Load<Sprite>("WardSprites/Š‹ü‹æ");
             field.GetComponent<SpriteRenderer>().sprite = sprite;
             Node node = field.transform.GetChild(0).gameObject.GetComponent<Node>();
-            node.setSprite("a’JVh");
+            node.setSprite("Š‹ü‹æ");
             if (PhotonNetwork.IsMasterClient)
             {
                 Destroy(field.gameObject);

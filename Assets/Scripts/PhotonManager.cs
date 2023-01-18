@@ -3,6 +3,7 @@ using Photon.Realtime;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections;
 
 public class PhotonManager : MonoBehaviourPunCallbacks
 {
@@ -21,6 +22,8 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public GameObject roomListPanel;
     public Roomview originalRoomButton;
     public GameObject roomButtonContent;
+    public GameObject RoomexistButton;
+    public GameObject BackButton;
     Dictionary<string, RoomInfo> roomsList = new Dictionary<string, RoomInfo>();
 
     private List<Roomview> allRoomButtons = new List<Roomview>();
@@ -65,19 +68,24 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         roomListPanel.SetActive(false);
         nameInputPanel.SetActive(false);
         firstLobbybuttons.SetActive(false);
-
+        RoomexistButton.SetActive(false);
+        BackButton.SetActive(false);
     }
 
     public void LobbyMenuDisplay()
     {
         CloseMenuUI();
         buttons.SetActive(true);
+        BackButton.SetActive(true);
+
     }
+
     
     public void FirstLobbyMenuDisplay()
     {
         CloseMenuUI();
         firstLobbybuttons.SetActive(true);
+        
     }
 
     public override void OnConnectedToMaster()
@@ -91,7 +99,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
 
     public override void OnJoinedLobby()
     {
-        LobbyMenuDisplay();
+        FirstLobbyMenuDisplay();
         roomsList.Clear();
         PhotonNetwork.NickName = Random.Range(0, 1000).ToString();
         ConfirmationName();
@@ -118,6 +126,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     {
         CloseMenuUI();
         createRoomPanel.SetActive(true);
+    } 
+    
+    public void OpenCreateExitPanel()
+    {
+        CloseMenuUI();
+        RoomexistButton.SetActive(true);      
     }
     
     
@@ -126,7 +140,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         if (!string.IsNullOrEmpty(enterRoomName.text))
         {
             RoomOptions options = new RoomOptions();
-            options.MaxPlayers = 8;
+            options.MaxPlayers = 2;
 
             PhotonNetwork.CreateRoom(enterRoomName.text, options);
 
@@ -143,26 +157,43 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         {
             CloseMenuUI();
             roomPanel.SetActive(true);
-            roomName.text = PhotonNetwork.CurrentRoom.Name;
+            roomName.text = "ÉãÅ[ÉÄñºÅF" + PhotonNetwork.CurrentRoom.Name;
             GetAllPlayer();
             CheckRoomMaster();
         }
         else
         {
-            GetAllPlayer();
-            CheckRoomMaster();
-            LoadingText.text = "ÉãÅ[ÉÄçÏê¨íÜ...";
+
+
+            CloseMenuUI();
             LoadingPanel.SetActive(true);
-            Debug.Log("ë“ã@Ç∑ÇÈÇÊÅ[");
-            if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
-            {
-                PlayGame();
-            }
-            
-            
+            RoomexistButton.SetActive(true);
+            StartCoroutine(LoadingRandamText());
+
         }
         
     }
+
+    IEnumerator LoadingRandamText()
+    {
+        float elapsedTime = 0;
+
+        elapsedTime += Time.deltaTime;
+        while (elapsedTime < 50)
+        {
+            LoadingText.text = "ëŒêÌëäéËÇíTÇµÇƒÇ¢Ç‹Ç∑.";
+            yield return new WaitForSeconds(0.3f);
+
+            LoadingText.text = "ëŒêÌëäéËÇíTÇµÇƒÇ¢Ç‹Ç∑..";
+            yield return new WaitForSeconds(0.3f);
+
+            LoadingText.text = "ëŒêÌëäéËÇíTÇµÇƒÇ¢Ç‹Ç∑...";
+            yield return new WaitForSeconds(0.3f);
+        }      
+
+    }
+
+
 
     public void LeaveRoom()
     {
@@ -170,11 +201,12 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         CloseMenuUI();
         LoadingText.text = "ëﬁèoíÜ...";
         LoadingPanel.SetActive(true);
+        atRandam = false;
     }
 
     public override void OnLeftRoom()
     {
-        LobbyMenuDisplay();
+        FirstLobbyMenuDisplay();
     }
 
     public override void OnCreateRoomFailed(short returnCode, string message)
@@ -182,6 +214,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         CloseMenuUI();
         errorText.text = "ÉãÅ[ÉÄçÏê¨Ç…é∏îsÇµÇ‹ÇµÇΩ" + message;
         errorPanel.SetActive(true);
+        OpenCreateExitPanel();
     }
     public void FindRoom()
     {
@@ -323,6 +356,16 @@ public class PhotonManager : MonoBehaviourPunCallbacks
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         PlayerTextGeneration(newPlayer);
+
+        if (atRandam)
+        {
+            Debug.Log("ëñÇÈÇÊ1");
+            if (PhotonNetwork.CurrentRoom.PlayerCount == PhotonNetwork.CurrentRoom.MaxPlayers)
+            {
+                PlayGame();
+                Debug.Log("ëñÇÈÇÊ2");
+            }
+        }
     }
 
     public override void OnPlayerLeftRoom(Player otherPlayer)
@@ -349,6 +392,7 @@ public class PhotonManager : MonoBehaviourPunCallbacks
         }
     }
 
+    [PunRPC]
     public void PlayGame()
     {
         PhotonNetwork.LoadLevel(LevelToPlay);

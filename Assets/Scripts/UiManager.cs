@@ -21,6 +21,7 @@ public class UiManager : MonoBehaviourPunCallbacks
     private float seconds;
     public Text player1;
     public Text player2;
+    
 
 
     private void Start()
@@ -31,7 +32,7 @@ public class UiManager : MonoBehaviourPunCallbacks
 
             player1.text = players[0].NickName;
             player2.text = players[1].NickName;
-
+            
         }
 
 

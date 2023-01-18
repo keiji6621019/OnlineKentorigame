@@ -24,6 +24,7 @@ public class InputManager : MonoBehaviourPunCallbacks
 
                 if (n != null)
                 {
+                    n.ArrowStart();
                     //if (SystemInfo.supportsVibration)
                     //{
                     //    Handheld.Vibrate();
@@ -47,8 +48,9 @@ public class InputManager : MonoBehaviourPunCallbacks
                 Node n = hit.collider.GetComponent<Node>();
 
                 if (n != null)
-                {   
-                  GameManager.instance.VisutToNodes(n);
+                {
+                    Debug.Log("—£‚µ‚½");
+                    GameManager.instance.VisutToNodes(n);
                    
                 }
                 

@@ -56,7 +56,7 @@ public class GameManager : MonoBehaviourPunCallbacks
             string goalNodeTag = nodeToVisit.name;
             Debug.Log("VISIT node SELECTED");
             
-           selectedNode.SendUnits(goalNodeTag);
+           selectedNode.SendUnits(goalNodeTag, selectedNode.currentAmount);
 
             selectedNode = null;
             nodeToVisit = null;

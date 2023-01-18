@@ -353,6 +353,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 78cdee091290a2b4d9612ce2fc01e1a5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  currentAmount: 0
   materials:
   - {fileID: 2100000, guid: e4ce4b838bd302349bc951318e1fc44f, type: 2}
   - {fileID: 2100000, guid: f564ae71ee074434c96b3b6852892384, type: 2}
@@ -361,10 +362,13 @@ MonoBehaviour:
   - {fileID: 2100000, guid: cf0d433a4cf06ff409fa548a221b8924, type: 2}
   - {fileID: 2100000, guid: 4c06f99d6bdfcb5448c500d4d0636da2, type: 2}
   - {fileID: 2100000, guid: 3a106eeb601da774ca26f623845d3766, type: 2}
+  - {fileID: 2100000, guid: 777ea19fa297a8c478e50229153d712d, type: 2}
   amountText: {fileID: 5822109467481875667}
   fraction: 2
   type: 1
   unitPrefab: {fileID: 7650612782017422497, guid: c8ae95bf9390c744b906bf006b4bbc46, type: 3}
+  arrowPrefab: {fileID: 5572808473327204030, guid: 9a3e91979a856654b9473d118a54a462, type: 3}
+  DamageTextPrefab: {fileID: 4926636881231714183, guid: dda95740f6d20b940859fe86851bf372, type: 3}
 --- !u!114 &3357894858921445001
 MonoBehaviour:
   m_ObjectHideFlags: 0

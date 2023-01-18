@@ -45,6 +45,14 @@ MonoBehaviour:
   - VisutToNodes
   - Playerposition
   - setSprite
+  - PlayGame
+  - FractionHander
+  - EnemyField
+  - PlayerField
+  - Produceunit
+  - UpdateAmountText
+  - Unitpersend
+  - Produceunit2
   DisableAutoOpenWizard: 1
   ShowSettings: 1
   DevRegionSetOnce: 0
